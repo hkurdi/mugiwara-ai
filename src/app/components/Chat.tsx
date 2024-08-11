@@ -1,25 +1,37 @@
-import { useChat } from "@ai-sdk/react";
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { useChat } from "ai/react";
 
 const Chat = () => {
-  const { messages, input, handleInputChange, handleSubmit } = useChat({
-    api: "/api/openai",
-  });
+  const { messages, input, handleInputChange, handleSubmit, setMessages } =
+    useChat({ api: "/api/openai" });
 
   const chatContainer = useRef<HTMLDivElement>(null);
 
   const scroll = () => {
     if (chatContainer.current) {
-      const { offsetHeight, scrollHeight, scrollTop } = chatContainer.current;
-      if (scrollHeight >= scrollTop + offsetHeight) {
-        chatContainer.current.scrollTo(0, scrollHeight + 200);
-      }
+      const { scrollHeight } = chatContainer.current;
+      chatContainer.current.scrollTo(0, scrollHeight);
     }
   };
 
   useEffect(() => {
+    // Scroll to the latest message whenever messages change
     scroll();
+  }, [messages]);
+
+  useEffect(() => {
+    // Add a greeting when the chat first loads
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "greeting",
+          role: "system",
+          content:
+            "Hello! I'm Monkey D. Luffy, and I'm gonna be the king of the pirates! What's your name?",
+        },
+      ]);
+    }
   }, [messages]);
 
   const renderResponse = () => {
@@ -51,17 +63,6 @@ const Chat = () => {
     );
   };
 
-  useEffect(() => {
-    if (messages.length === 0) {
-      messages.push({
-        id: "greeting",
-        role: "system",
-        content: "Hello! I'm Monkey D. Luffy, and i'm gonna be the king of the pirates! What's your name?",
-      });
-      renderResponse();
-    }
-  }, []);
-
   return (
     <div ref={chatContainer} className="chat">
       {renderResponse()}
@@ -73,7 +74,9 @@ const Chat = () => {
           onChange={handleInputChange}
           value={input}
         />
-        <button type="submit" className="send-button" />
+        <button type="submit" className="send-button">
+          Send
+        </button>
       </form>
     </div>
   );
