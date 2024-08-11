@@ -16,12 +16,10 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    // Scroll to the latest message whenever messages change
     scroll();
   }, [messages]);
 
   useEffect(() => {
-    // Add a greeting when the chat first loads
     if (messages.length === 0) {
       setMessages([
         {
